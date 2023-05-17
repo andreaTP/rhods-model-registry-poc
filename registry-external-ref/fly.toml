@@ -1,0 +1,44 @@
+# fly.toml app configuration file generated for registry-external-ref on 2023-05-16T15:02:52+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "registry-external-ref"
+primary_region = "mad"
+
+[http_service]
+  internal_port = 8080
+  force_https = false
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[build]
+  image = "docker.io/andreatp/registry-external-ref:latest"
+
+[env]
+  CORS_ALLOWED_ORIGINS = "*"
+  QUARKUS_HTTP_INSECURE_REQUESTS = "enabled"
+  QUARKUS_DATASOURCE_JDBC_VALIDATION_QUERY = "SELECT 1"
+  REGISTRY_UI_CONFIG_APIURL = "https://registry-external-ref.fly.dev/apis/registry/"
+
+# TODO: seems to be failing, doublecheck!
+# [[services.http_checks]]
+#   interval = 20000
+#   grace_period = "120s"
+#   method = "get"
+#   path = "/health/ready"
+#   protocol = "http"
+#   restart_limit = 5
+#   timeout = 5000
+#   tls_skip_verify = true
+
+[checks]
+  [checks.registry-ready]
+    grace_period = "60s"
+    interval = "15s"
+    method = "get"
+    path = "/health/ready"
+    port = 8080
+    timeout = "10s"
+    type = "http"

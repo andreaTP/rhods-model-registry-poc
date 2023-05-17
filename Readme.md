@@ -1,26 +1,14 @@
-# Apicurio Registry With BigQuery Support Example
+# RHODS Model Registry Demo
 
-Motivated by this PR:
-https://github.com/Apicurio/apicurio-registry/pull/2923
+Agenda:
 
-we decided to make Registry "extensible" by the users regarding artifact type support.
+- Have an Apicurio Registry Docker image with support for(only?) External References - done
+- Deploy it to fly.io - done
+- Deploy a public S3 equivalent -> Minio // https://fly.io/docs/app-guides/minio/ - done
+- Build a Python SDK for uploading the model - in-progress
+- Invoke the Python SDK from a Jupyther Notebook
+- Have a local Model-mesh installation (based on minikube)
+- Write a little Operator that handle a CRD "ModelStream" that watches the Registry instance for changes to the latest tag of a model and rewrite the Inference CR for ModelMesh
+- Wrap it up, blog, have a video or something similar
 
-This project shows how it's possible to extend Apicurio Registry and bundle up a working service including a custom Artifact Type support.
-
-# Build
-
-```
-mvn clean install
-```
-
-# Run
-
-```
-cd target/
-java -jar apicurio-registry-with-bigquery-0.0.1-SNAPSHOT-runner.jar
-```
-
-### Known limitations
-
- - when creating an artifact of a type not included in the default you need to ALWAYS specify the appropriate ArtifactType
- - the UI will show the plain name of the additional type and won't have an appropriate icon to identify it
+- extra: deploy a new model from CI

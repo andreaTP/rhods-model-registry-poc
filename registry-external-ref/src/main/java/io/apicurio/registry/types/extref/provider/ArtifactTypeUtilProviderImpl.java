@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.apicurio.registry.types.bigquery.provider;
+package io.apicurio.registry.types.extref.provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +43,17 @@ public class ArtifactTypeUtilProviderImpl extends DefaultArtifactTypeUtilProvide
     ArtifactTypeUtilProviderImpl() {
         this.providers = new ArrayList<ArtifactTypeUtilProvider>(
             List.of(
-                    new AsyncApiArtifactTypeUtilProvider(),
-                    new AvroArtifactTypeUtilProvider(),
-                    new BigQueryArtifactTypeUtilProvider(),
-                    new GraphQLArtifactTypeUtilProvider(),
-                    new JsonArtifactTypeUtilProvider(),
-                    new KConnectArtifactTypeUtilProvider(),
-                    new OpenApiArtifactTypeUtilProvider(),
-                    new ProtobufArtifactTypeUtilProvider(),
-                    new WsdlArtifactTypeUtilProvider(),
-                    new XmlArtifactTypeUtilProvider(),
-                    new XsdArtifactTypeUtilProvider())
+//                    new AsyncApiArtifactTypeUtilProvider(),
+//                    new AvroArtifactTypeUtilProvider(),
+                    new ExternalRefArtifactTypeUtilProvider())
+//                    new GraphQLArtifactTypeUtilProvider(),
+//                    new JsonArtifactTypeUtilProvider(),
+//                    new KConnectArtifactTypeUtilProvider(),
+//                    new OpenApiArtifactTypeUtilProvider(),
+//                    new ProtobufArtifactTypeUtilProvider(),
+//                    new WsdlArtifactTypeUtilProvider(),
+//                    new XmlArtifactTypeUtilProvider(),
+//                    new XsdArtifactTypeUtilProvider())
         );
     }
 
