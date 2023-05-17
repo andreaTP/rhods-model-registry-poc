@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rhods-model-registry-poc"
+version = "0.1.0"
+description = ""
+authors = ["Andrea Peruffo <andrea.peruffo1982@gmail.com>"]
+readme = "README.md"
+packages = [{include = "model_registry_python_sdk"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+minio = "^7.1.14"
+apicurio-registry-python-sdk-preview = "^2.4.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.1"
+pytest-asyncio = "^0.21.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = [ "model_registry_python_sdk" ]
