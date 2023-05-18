@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "rhods-model-registry-poc"
-version = "0.1.0"
+version = "0.1.5"
 description = ""
 authors = ["Andrea Peruffo <andrea.peruffo1982@gmail.com>"]
 readme = "README.md"
 packages = [{include = "model_registry_python_sdk"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 minio = "^7.1.14"
-apicurio-registry-python-sdk-preview = "^2.4.3"
+apicurio-registry-python-sdk-preview = "^2.4.9"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3.1"
