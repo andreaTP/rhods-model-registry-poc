@@ -11,6 +11,7 @@ from apicurioregistrysdk.client.registry_client import RegistryClient
 from apicurioregistrysdk.client.models.artifact_content import ArtifactContent
 
 REGISTRY_URL = f"https://registry-external-ref.fly.dev/apis/registry/v2"
+# MINIO_URL = "'2a09:8280:1::37:1c21':9000"
 MINIO_URL = "registry-external-ref-minio.fly.dev:9000"
 BUCKET = "models"
 
