@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rhods-model-registry-poc"
-version = "0.1.7"
+version = "0.1.8"
 description = ""
 authors = ["Andrea Peruffo <andrea.peruffo1982@gmail.com>"]
 readme = "README.md"

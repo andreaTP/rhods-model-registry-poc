@@ -34,6 +34,7 @@ class ModelRegistryClient:
   
   async def register_model(self, name, file_name) -> bool:
     result=self.s3_client.fput_object(BUCKET, name, file_name)
+    result=self.s3_client.fput_object(BUCKET, result.version_id, file_name)
     # print("created {0} object; etag: {1}, version-id: {2}".format(result.object_name, result.etag, result.version_id))
     
     payload = ArtifactContent()

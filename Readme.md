@@ -12,3 +12,8 @@ Agenda:
 - Wrap it up, blog, have a video or something similar
 
 - extra: deploy a new model from CI
+
+
+To Do:
+- registry publish sql sub-module
+- python-sdk registry -> skip generation if file exists
