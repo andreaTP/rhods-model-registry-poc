@@ -21,6 +21,7 @@ primary_region = "mad"
 
 [[services]]
   http_checks = []
+  # use ipv6 to resolve the address or pay for a static ipv4
   internal_port = 9000
   protocol = "tcp"
   script_checks = []

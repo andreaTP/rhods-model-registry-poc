@@ -1,0 +1,19 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: basic
+  namespace: modelmesh-serving
+  annotations:
+    serving.kserve.io/deploymentMode: ModelMesh
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: sklearn
+      runtime: mlserver-0.x
+      storage:
+        key: registryMinio
+        path: last-basic-example.joblib
+        # parameters:
+        # old version: c75fc44d-eb29-4447-91b1-b8641b6c3b3c
+        # new version: 3c1fe884-79a2-4ba0-82d2-4560bbb80ac5
