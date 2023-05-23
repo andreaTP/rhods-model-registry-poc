@@ -13,8 +13,9 @@ spec:
       runtime: mlserver-0.x
       storage:
         key: registryMinio
-        path: last-basic-example.joblib
-        schemaPath: last-basic-example.joblib
+        # path: basic-example.joblib
+        path: 7c2b770e-30e1-40be-a44c-ee39d4dcdda0
+        # schemaPath: last-basic-example.joblib
         # checking a single version doesn't work:
         # old version: c75fc44d-eb29-4447-91b1-b8641b6c3b3c
         # new version: 3c1fe884-79a2-4ba0-82d2-4560bbb80ac5
