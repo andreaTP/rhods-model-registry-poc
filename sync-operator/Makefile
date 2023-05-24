@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= docker.io/andreatp/model-registry-sync-operator:latest
 
 all: docker-build
 

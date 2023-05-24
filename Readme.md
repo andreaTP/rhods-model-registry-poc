@@ -8,7 +8,7 @@ Agenda:
 - Build a Python SDK for uploading the model - published as 'rhods-model-registry-poc' - done
 - Invoke the Python SDK from a Jupyther Notebook - connection reset by peer using RHODS - working locally - done
 - Have a local Model-mesh installation (based on minikube) - done
-- Write a little Operator that handle a CRD "ModelStream" that watches the Registry instance for changes to the latest tag of a model and rewrite the Inference CR for ModelMesh - in progress
+- Write a little Operator that handle a CRD "ModelStream" that watches the Registry instance for changes to the latest tag of a model and rewrite the Inference CR for ModelMesh - in progress - done
 - Wrap it up, blog, have a video or something similar
 
 - extra: deploy a new model from CI

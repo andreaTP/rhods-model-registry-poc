@@ -1,0 +1,8 @@
+apiVersion: apicurio.io/v1
+kind: ModelVersion
+metadata:
+  name: simple-latest
+spec:
+  registryUrl: https://registry-external-ref.fly.dev/
+  artifactName: paolo-example.joblib
+  mode: "LATEST"

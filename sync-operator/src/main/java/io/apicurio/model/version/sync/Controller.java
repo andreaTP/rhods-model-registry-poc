@@ -1,29 +1,38 @@
 package io.apicurio.model.version.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.kiota.authentication.AnonymousAuthenticationProvider;
-import com.microsoft.kiota.http.OkHttpRequestAdapter;
+import io.apicurio.registry.rest.client.RegistryClientFactory;
 import io.apicurio.v1.ModelVersion;
 import io.apicurio.v1.ModelVersionSpec;
 import io.apicurio.v1.ModelVersionStatus;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.ErrorStatusHandler;
 import io.javaoperatorsdk.operator.api.reconciler.ErrorStatusUpdateControl;
+import io.javaoperatorsdk.operator.api.reconciler.EventSourceContext;
+import io.javaoperatorsdk.operator.api.reconciler.EventSourceInitializer;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
+import io.javaoperatorsdk.operator.processing.event.source.EventSource;
+import io.javaoperatorsdk.operator.processing.event.source.polling.PerResourcePollingEventSource;
 import io.kserve.serving.v1beta1.InferenceService;
 import io.kserve.serving.v1beta1.InferenceServiceBuilder;
+import io.quarkus.logging.Log;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Set;
 
-public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<ModelVersion> {
+@ControllerConfiguration()
+public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<ModelVersion>, EventSourceInitializer<ModelVersion> {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public UpdateControl<ModelVersion> reconcile(ModelVersion modelVersion, Context<ModelVersion> context) throws Exception {
+        Log.infof("Reconcile loop starting for Model Version %s", modelVersion.getMetadata().getName());
         var namespace = modelVersion.getMetadata().getNamespace();
         var prevInferenceService = context
                 .getClient()
@@ -32,16 +41,9 @@ public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<
                 .withName(modelVersion.getMetadata().getName())
                 .get();
 
-        String currentArtifactVersion = null;
-        try {
-            currentArtifactVersion = modelVersion.getStatus().getArtifactVersion();
-        } catch (Exception e) {
-            // ignore
-        }
-
         String currentPath = null;
         try {
-            prevInferenceService
+            currentPath = prevInferenceService
                     .getSpec()
                     .getPredictor()
                     .getModel()
@@ -51,43 +53,33 @@ public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<
             // ignore
         }
 
-        AtomicReference<String> path = new AtomicReference<>();
+        String path = null;
         if (modelVersion.getSpec().getMode().equals(ModelVersionSpec.Mode.FIXED)) {
             // If version is fixed we simply use it as the object name
-            path.setPlain(currentArtifactVersion);
-        } else {
+            Log.infof("Using fixed version: %s", modelVersion.getSpec().getArtifactVersion());
+            path = modelVersion.getSpec().getArtifactVersion();
+        } else if (context.getSecondaryResource(String.class).isPresent()) {
             // If version has to be latest we should poll
-            // This section needs to be a PollResource
-            var adapter = new OkHttpRequestAdapter(new AnonymousAuthenticationProvider());
-            var client = new io.apicurio.registry.client.ApiClient(adapter);
-
-            client
-                    .groups("default")
-                    .artifacts(modelVersion.getSpec().getArtifactName())
-                    .get()
-                    .thenAccept(is -> {
-                        try {
-                            var json = objectMapper.readTree(is);
-                            path.setPlain(json.get("object_name").asText());
-                        } catch (IOException e) {
-                            // ignore
-                        }
-                    })
-                    // TODO: FIXME using a fully async. I agree, this is horrific!
-                    .get(10, TimeUnit.SECONDS);
+            Log.infof("Using LATEST: %s", path);
+            path = context.getSecondaryResource(String.class).get();
+        } else {
+            // throw exception?
+            throw new RuntimeException("OOOPS");
         }
 
-
-        if (currentArtifactVersion != null && currentArtifactVersion.equals(currentPath)) {
+        Log.infof("Current artifact version: %s, current path: %s, final path is: %s", modelVersion.getMetadata().getName(), currentPath, path);
+        if (path != null && path.equals(currentPath)) {
             return UpdateControl.noUpdate();
         } else {
             context
                     .getClient()
                     .resources(InferenceService.class)
-                    .createOrReplace(getInferenceService(modelVersion, path.get()));
+                    .createOrReplace(getInferenceService(modelVersion, path));
 
-            modelVersion.getStatus().setStatus("Synced");
-            modelVersion.getStatus().setArtifactVersion(path.get());
+            ModelVersionStatus status = new ModelVersionStatus();
+            status.setStatus("Synced");
+            status.setArtifactVersion(path);
+            modelVersion.setStatus(status);
             return UpdateControl.updateStatus(modelVersion);
         }
     }
@@ -97,6 +89,16 @@ public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<
                 .withNewMetadata()
                     .withName(modelVersion.getMetadata().getName())
                     .withNamespace(modelVersion.getMetadata().getNamespace())
+                    .withAnnotations(Map.of("serving.kserve.io/deploymentMode", "ModelMesh"))
+                    .withOwnerReferences(
+                            new OwnerReferenceBuilder()
+                                    .withController(true)
+                                    .withBlockOwnerDeletion(true)
+                                    .withApiVersion(modelVersion.getApiVersion())
+                                    .withKind(modelVersion.getKind())
+                                    .withName(modelVersion.getMetadata().getName())
+                                    .withUid(modelVersion.getMetadata().getUid())
+                                    .build())
                 .endMetadata()
                 .withNewSpec()
                     .withNewPredictor()
@@ -122,5 +124,24 @@ public class Controller implements Reconciler<ModelVersion>, ErrorStatusHandler<
         status.setArtifactVersion(null);
         modelVersion.setStatus(status);
         return ErrorStatusUpdateControl.updateStatus(modelVersion);
+    }
+
+    @Override
+    public Map<String, EventSource> prepareEventSources(EventSourceContext<ModelVersion> eventSourceContext) {
+        return EventSourceInitializer.nameEventSources(new PerResourcePollingEventSource<String, ModelVersion>(
+                modelVersion -> {
+                    try {
+                        var client = RegistryClientFactory.create(modelVersion.getSpec().getRegistryUrl());
+                        InputStream is = client.getLatestArtifact("default", modelVersion.getSpec().getArtifactName());
+                        var value = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                        var json = objectMapper.readTree(value);
+                        var path = json.get("object_name").asText();
+//                        Log.infof("Artifact: %s is available at the id %s", modelVersion.getSpec().getArtifactName(), path);
+                        return Set.of(path);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                        // or return empty?
+                    }
+                }, eventSourceContext.getPrimaryCache(), 1000, String.class));
     }
 }
