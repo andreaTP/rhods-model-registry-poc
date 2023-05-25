@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>RHODS + Model Registry POC Demo</title>
+    <script defer>
+      window.onload = function() {
+        const sliderX = document.getElementById("xRange");
+        const sliderY = document.getElementById("yRange");
+        const outputX = document.getElementById("xLabel");
+        const outputY = document.getElementById("yLabel");
+        outputX.innerHTML = sliderX.value;
+        outputY.innerHTML = sliderY.value;
+        sliderX.oninput = function() {
+          outputX.innerHTML = this.value;
+        }
+        sliderY.oninput = function() {
+          outputY.innerHTML = this.value;
+        }
+      }
+
+      const getBodyContent = function() {
+        const sliderX = document.getElementById("xRange");
+        const sliderY = document.getElementById("yRange");
+        return JSON.stringify({
+          "model_name": "basic",
+          "inputs": [
+            {
+              "name": "predict",
+              "shape": [1, 2],
+              "datatype": "FP32",
+              "data": [[parseInt(sliderX.value), parseInt(sliderY.value)]]
+            }
+          ]
+        });
+      }
+      const predict = async function() {
+        const response = await fetch(`http://localhost:8010/proxy/v2/models/${document.getElementById("model").value}/infer`,
+          { method: "POST",
+            // headers: {"Host": "modelmesh-serving.modelmesh-serving:8033"},
+            // mode: 'no-cors',
+            body: window.getBodyContent()
+          });
+
+        if (response.status == 200) {
+          document.getElementById("result").value = (await response.json()).outputs[0].data[0];
+        } else {
+          document.getElementById("result").value = "Error!";
+        }
+      }
+      window.getBodyContent = getBodyContent;
+      window.predict = predict;
+    </script>
+  <body>
+    <div class="slidecontainer">
+      <label value="X">X :</label>
+      <input type="range" min="0" max="30" value="10" class="slider" id="xRange">
+      <br/>
+      <label>value:</label>
+      <label id="xLabel" value="Value X"></label>
+      <br/>
+      <label value="Y">Y :</label>
+      <input type="range" min="0" max="30" value="10" class="slider" id="yRange">
+      <br/>
+      <label>value:</label>
+      <label id="yLabel" value="Value Y"></label>
+      <br/><hr/>
+      <label>Model name:</label>
+      <input id="model" title="Model name:" placeholder="simple-latest"></input>
+      <button id="predict" onclick="window.predict()">Predict!</button>
+      <input id="result" disabled></input>
+    </div>
+  </body>
+</html>

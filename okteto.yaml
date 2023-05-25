@@ -1,2 +1,0 @@
-deploy:
-  - cd modelmesh-serving && ./install.sh

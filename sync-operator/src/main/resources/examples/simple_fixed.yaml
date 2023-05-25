@@ -4,6 +4,6 @@ metadata:
   name: simple-fixed
 spec:
   registryUrl: https://registry-external-ref.fly.dev/
-  artifactName: paolo-example.joblib
-  artifactVersion: a8142696-ad4f-4d38-8ac9-64ccb2ab138a
+  artifactName: again-example.joblib
+  artifactVersion: 44635754-2213-4155-aa0e-e2dda6f6e3bf
   mode: "FIXED"

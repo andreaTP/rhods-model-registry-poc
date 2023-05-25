@@ -32,7 +32,7 @@ class ModelRegistryClient:
         secure=False,
     )
   
-  async def register_model(self, name, file_name) -> bool:
+  async def register_model(self, name, file_name) -> str:
     result=self.s3_client.fput_object(BUCKET, name, file_name)
     result=self.s3_client.fput_object(BUCKET, result.version_id, file_name)
     # print("created {0} object; etag: {1}, version-id: {2}".format(result.object_name, result.etag, result.version_id))
@@ -52,4 +52,4 @@ class ModelRegistryClient:
         await self.client.groups_by_id("default").artifacts_by_id(name).versions.post(payload, config)
     except:
         await self.client.groups_by_id("default").artifacts.post(payload, config)
-    return True
+    return result.object_name
