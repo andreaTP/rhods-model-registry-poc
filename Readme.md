@@ -16,5 +16,6 @@ Agenda:
 
 
 To Do:
-- registry publish sql sub-module
-- python-sdk registry -> skip generation if file exists
+- registry publish sql sub-module - TODO
+- python-sdk registry -> skip generation if file exists - submit PR
+- Kiota Registry SDK returns an already closed InputStream - verify
