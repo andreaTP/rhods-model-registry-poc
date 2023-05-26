@@ -33,17 +33,21 @@
         });
       }
       const predict = async function() {
-        const response = await fetch(`http://localhost:8010/proxy/v2/models/${document.getElementById("model").value}/infer`,
-          { method: "POST",
-            // headers: {"Host": "modelmesh-serving.modelmesh-serving:8033"},
-            // mode: 'no-cors',
-            body: window.getBodyContent()
-          });
+        try {
+          const response = await fetch(`http://localhost:8010/proxy/v2/models/${document.getElementById("model").value}/infer`,
+            { method: "POST",
+              // headers: {"Host": "modelmesh-serving.modelmesh-serving:8033"},
+              // mode: 'no-cors',
+              body: window.getBodyContent()
+            });
 
-        if (response.status == 200) {
-          document.getElementById("result").value = (await response.json()).outputs[0].data[0];
-        } else {
-          document.getElementById("result").value = "Error!";
+          if (response.status == 200) {
+            document.getElementById("result").value = (await response.json()).outputs[0].data[0];
+          } else {
+            document.getElementById("result").value = "Error!";
+          }
+        } catch (e) {
+          document.getElementById("result").value = "Communication error";
         }
       }
       window.getBodyContent = getBodyContent;
