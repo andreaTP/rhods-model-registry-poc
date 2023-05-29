@@ -9,6 +9,8 @@ from minio import Minio
 from apicurioregistrysdk.client.groups.item.artifacts.artifacts_request_builder import ArtifactsRequestBuilder
 from apicurioregistrysdk.client.registry_client import RegistryClient
 from apicurioregistrysdk.client.models.artifact_content import ArtifactContent
+from apicurioregistrysdk.client.models.editable_meta_data import EditableMetaData
+from apicurioregistrysdk.client.models.properties import Properties
 
 REGISTRY_URL = f"https://registry-external-ref.fly.dev/apis/registry/v2"
 # MINIO_URL = "'2a09:8280:1::37:1c21':9000"
@@ -32,7 +34,7 @@ class ModelRegistryClient:
         secure=False,
     )
   
-  async def register_model(self, name, file_name) -> str:
+  async def register_model(self, name, file_name, description = "", metadata = {}, labels = []) -> str:
     result=self.s3_client.fput_object(BUCKET, name, file_name)
     result=self.s3_client.fput_object(BUCKET, result.version_id, file_name)
     # print("created {0} object; etag: {1}, version-id: {2}".format(result.object_name, result.etag, result.version_id))
@@ -52,4 +54,13 @@ class ModelRegistryClient:
         await self.client.groups_by_id("default").artifacts_by_id(name).versions.post(payload, config)
     except:
         await self.client.groups_by_id("default").artifacts.post(payload, config)
+        
+    meta = EditableMetaData()
+    props = Properties()
+    props.additional_data = metadata
+    meta.properties = props
+    meta.description = description
+    meta.labels = labels
+    await self.client.groups_by_id("default").artifacts_by_id(name).meta.put(meta)
+    
     return result.object_name

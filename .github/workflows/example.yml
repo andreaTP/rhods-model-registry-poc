@@ -1,0 +1,23 @@
+name: Publish trained model
+on:
+  workflow_dispatch:
+
+jobs:
+  push_to_registry:
+    name: Push trained model to registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install the python dependencies
+        run: pip install scikit-learn==0.24.2 joblib==1.1.0 numpy
+      - name: Install the model registry SDK
+        run: pip install --upgrade rhods-model-registry-poc
+      - name: Train the model
+        run: .github/train_model_and_store.py
+      - name: Register Model in Registry
+        run: .github/register_model.py

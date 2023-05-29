@@ -12,9 +12,15 @@ Agenda:
 - deploy modelmesh-serving and the operator in a public K8s offering (free plan) - on Okteto - need to setup too many things, on hold for now
 - find a good visualization for the demo - done - good enough
 - Wrap it up, blog, have a video or something similar - a python notebook based demo
+- Track model framework and a few other metadata
 
 - extra: deploy a new model from CI
 
 
 To Do:
 - Kiota Registry SDK returns an already closed InputStream - verify
+
+
+
+Follow-up:
+- Track the training data as artifacts in registry as well

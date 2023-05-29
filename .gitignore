@@ -1,3 +1,5 @@
 target
 secret.md
 model-serving/modelmesh-serving/
+
+example.joblib
