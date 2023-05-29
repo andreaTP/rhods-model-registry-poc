@@ -20,4 +20,7 @@ jobs:
       - name: Train the model
         run: .github/train_model_and_store.py
       - name: Register Model in Registry
+        env:
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
         run: .github/register_model.py
